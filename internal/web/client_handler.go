@@ -20,6 +20,7 @@ func (h *WebClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) 
 	var dto createclient.CreateClientInputDTO
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
+		
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
