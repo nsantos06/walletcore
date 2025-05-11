@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity/gateway"
+	"github.com.br/devfullcycle/fc-ms-wallet/internal/gateway"
 )
 
 type CreateClientInputDTO struct {
