@@ -2,7 +2,8 @@ package createtransaction
 
 import (
 	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity/gateway"
+	"github.com.br/devfullcycle/fc-ms-wallet/internal/gateway"
+	"github.com.br/devfullcycle/fc-ms-wallet/pkg/events"
 )
 
 type CreateTransactionInputDTO struct {
@@ -16,14 +17,21 @@ type CreateTransactionOutputDTO struct {
 }
 
 type CreateTransactionUseCase struct {
-	AccountGateway  gateway.AccountGateway
+	AccountGateway     gateway.AccountGateway
 	TransactionGateway gateway.TransactionGateway
+	eventDispatcher    events.EventDispatcherInterface
+	transactionCreated events.EventInterface
 }
 
-func NewCreateTransactionUseCase(transactionGateway gateway.TransactionGateway, accountGateway gateway.AccountGateway) *CreateTransactionUseCase {
+func NewCreateTransactionUseCase(transactionGateway gateway.TransactionGateway, 
+	accountGateway gateway.AccountGateway, 
+	eventDispatcher events.EventDispatcherInterface, 
+	transactionCreated events.EventInterface) *CreateTransactionUseCase {
 	return &CreateTransactionUseCase{
 		TransactionGateway: transactionGateway,
 		AccountGateway:     accountGateway,
+		eventDispatcher:    eventDispatcher,
+		transactionCreated: transactionCreated,
 	}
 }
 
@@ -32,7 +40,7 @@ func (uc *CreateTransactionUseCase) Execute(input CreateTransactionInputDTO) (*C
 	if err != nil {
 		return nil, err
 	}
-	accountTo, err := uc.AccountGateway.FindByID(input.AccountIDTo)	
+	accountTo, err := uc.AccountGateway.FindByID(input.AccountIDTo)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +52,13 @@ func (uc *CreateTransactionUseCase) Execute(input CreateTransactionInputDTO) (*C
 	if err != nil {
 		return nil, err
 	}
-	return &CreateTransactionOutputDTO{ID: transaction.ID}, nil
+
+	output := &CreateTransactionOutputDTO{
+		ID: transaction.ID,
+	}
+	uc.transactionCreated.SetPayload(output)
+	uc.eventDispatcher.Dispatch(uc.transactionCreated)
+
+	return output, nil
 
 }
