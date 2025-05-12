@@ -21,6 +21,7 @@ func (h *WeTransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
