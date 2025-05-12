@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com.br/devfullcycle/fc-ms-wallet/internal/entity"
+	"github.com.br/devfullcycle/fc-ms-wallet/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -39,7 +40,7 @@ func TestCreateAccountUseCase_Execute(t *testing.T) {
 	clientMock := &ClientGatewayMock{}
 	clientMock.On("Get", client.ID).Return(client, nil)
 	
-	accountMock := &AccountGatewayMock{}
+	accountMock := &mocks.AccountGatewayMock{}
 	accountMock.On("Save", mock.Anything).Return(nil)
 	uc := NewCreateAccountUseCase(accountMock, clientMock)
 	inputDto := CreateAccountInputDTO{
