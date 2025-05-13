@@ -2,6 +2,8 @@ version: '3.8'
 services:
   goapp:
     build: .
+    depends_on:
+      - mysql
     volumes: 
       - .:/app
     ports:
@@ -36,15 +38,31 @@ services:
     ports:
       - "9092:9092"
     environment:
-      TZ: Sao_Paulo/Brazil
+      TZ: America/Sao_Paulo
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://localhost:9092
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
-      CONFLUENT_METRICS_ENABLE: 'false'
+      CONFLUENT_METRICS_ENABLE: 'true'
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.3.0
+    hostname: control-center 
+    container_name: control-center
+    depends_on:
+      - kafka 
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
